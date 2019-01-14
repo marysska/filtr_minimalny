@@ -23,7 +23,8 @@ int main(int argc, char** argv)
   int i;
   int j;
   int k;
-  printf("Prosze podac sciezke do pliku: \n");
+  int b;
+  printf("Filtr Minimalny\nProsze podac sciezke do pliku: \n");
   scanf("%s", path);
   while (window%2==0){
     printf("Prosze podac wielkosc okna - wartosc nieparzysta: \n");
@@ -64,48 +65,65 @@ int main(int argc, char** argv)
 
 
   func(bitmapOut, bitmapIn, window);
-    printf("i am back \n");
+
+    //printf("i am back \n");
 
 
-	BITMAP* outBMP;
-
+	BITMAP* grafika;
+	char c;
+	c='v';
 
 	allegro_init();
 	install_keyboard();
 	set_color_depth(24);
 
-	set_gfx_mode( GFX_AUTODETECT_WINDOWED,width+80,height+80, 0, 0);
-	clear_to_color(screen, makecol(191,23,115));
-
-	outBMP = create_bitmap(width, height);
-	if (!outBMP)
-    {
-		    printf("Nie mozna otworzyc pliku bmp!\n");
-		      return 1;
-	 }
-
-
-	j=0;
-	for(i=height-1;i>=0; --i)
-	{
-		for(k=0;k<width*3; ++k)
-		{
-          outBMP->line[i][k]=*(bitmapOut+offset+j*(width*3+padding)+k);
-		}
-		++j;
+	set_gfx_mode( GFX_AUTODETECT_WINDOWED,width,height, 0, 0);
+	grafika = create_bitmap(width, height);
+	if (!grafika){
+		printf("Nie mozna otworzyc pliku bmp!\n");
+		return -1;
 	}
+	printf("Menu:\n + aby zwiekszyc wielkosc okna\n - aby zmniejszyc wielkosc okna\n x aby zamknac program\n pozostale klawicze powoduja ponowne przefiltrowanie\n");
+	do {
+		switch (c) {
+			case '+':
+				window=window+2;
+				break;
+			
+			case '-':
+				if (window>3) window=window-2;
+				break;
+	
+			default:
 
-	blit(outBMP, screen, 0,0,40,40,width, height);
+
+				func(bitmapOut, bitmapIn, window);
+				j=0;
+				for(i=height-1;i>=0; --i)
+				{
+					for(k=0;k<width*3; ++k)
+					{
+					  grafika->line[i][k]=*(bitmapOut+offset+j*(width*3+padding)+k);
+					}
+					++j;
+				}
+
+				blit(grafika, screen, 0,0,0,0,width, height);
+				for (b=0; b<size_of_file;++b){
+					bitmapIn[b]=bitmapOut[b];
+				}
+		}
+		c=readkey();
+	} while (c!='x');
+
+ 
 
 
-  readkey();
-
-
-  destroy_bitmap(outBMP);
+  destroy_bitmap(grafika);
   allegro_exit();
 
 
-
+/*
 
    FILE *fp; 
 
@@ -114,8 +132,8 @@ int main(int argc, char** argv)
      exit(1);
      }
    fwrite(bitmapOut, sizeof(char), size_of_file, fp);
-   fclose (fp); /* zamknij plik */
-
+   fclose (fp); //zamknij
+*/
 
   free(bitmapIn);
   free(bitmapOut);

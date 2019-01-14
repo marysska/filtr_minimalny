@@ -83,23 +83,11 @@ przepisz_poczatek:	; ustaw liczniki
 	mov al, dl
 	add edx, 1
 	mov [kolumna], edx
-	mov dl, al
-	add dl, al
-	add dl, al	;3 razy distance przepisujemy
-
-
-
-przepisz_pocz_loop:
-	mov ah,[esi]
-	mov [edi], ah
-	add edi, 1
-	add esi ,1
-	sub dl, 1
-	test dl, dl
-	jnz przepisz_pocz_loop
-
-
-
+	xor ecx, ecx
+	mov cl, al
+	add cl, al
+	add cl, al	;3 razy distance przepisujemy
+	rep movsb
 
 f_lines:					;kopiowanie po bajcie - konwersja 1 pixelu
 	mov ah, [window]	;zaladuj licznik kolumn
@@ -152,19 +140,13 @@ next_line:
 	add edx, 1
 	mov [wiersz], edx
 	mov al, [distance]
-	mov dl, al
-	add dl, al
-	add dl, al
-	add dl, [padding]
+	xor ecx, ecx
+	mov cl, al
+	add cl, al
+	add cl, al
+	add cl, [padding]
+	rep movsb
 
-przepisz_kon:
-	mov ah,[esi]
-	mov [edi], ah
-	add edi, 1
-	add esi ,1
-	sub dl, 1
-	test dl, dl
-	jnz przepisz_kon
 sprawdz_cz_p:
 	mov eax , [height]	;sprawdz czy juz nie koniec
 	sub eax, [distance]

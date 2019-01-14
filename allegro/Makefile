@@ -13,7 +13,7 @@ func.o: func.s
 	$(ASM) $(AFLAGS) func.s	
 
 main: main.o func.o
-	$(CC) $(CFLAGS) main.o func.o -o wynik -lalleg
+	$(CC) $(CFLAGS) main.o func.o -o main -lalleg
 clean:
 	rm *.o
 

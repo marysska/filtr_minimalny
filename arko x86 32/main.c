@@ -15,22 +15,21 @@ extern "C" {
 int main(int argc, char** argv)
 { 
   FILE *image;
-  char c;
   char *bitmapIn;
   char *bitmapOut;//zeby nie robic nadpisywania jak cos
   int size_of_file, width, height, padding, offset;   //allegro potrzebuje, w func samo sie liczy
   char toconvert[4];
   int window=0;
   char path[150];
-  int i, j, k;
-  printf("Prosze podac sciezke do pliku: \n");
+  int i, j, k, b;
+  printf("Filtr Minimalny\nProsze podac sciezke do pliku: \n");
   scanf("%s", path);
   while (window%2==0){
     printf("Prosze podac wielkosc okna - wartosc nieparzysta: \n");
     scanf ("%d", &window);
   }
-  //otworz mape
-  if ((image=fopen(path, "rb"))==NULL)
+ 
+    if ((image=fopen(path, "rb"))==NULL)
      {
         printf ("Błąd otwarcia pliku: %s!\n",path);
         return 1;
@@ -62,67 +61,65 @@ int main(int argc, char** argv)
     fclose(image) ; //plik juz nie bedzie potrzebny
 
 
+//zawolanie procedur w assembly
+   	func(bitmapIn, bitmapOut, size_of_file, window);
 
-  func(bitmapIn, bitmapOut, size_of_file, window);
-
-	BITMAP* outBMP;
-
+	BITMAP* grafika;
+	char c;
+	c='v';
 
 	allegro_init();
 	install_keyboard();
 	set_color_depth(24);
 
 	set_gfx_mode( GFX_AUTODETECT_WINDOWED,width,height, 0, 0);
-
-	outBMP = create_bitmap(width, height);
-	if (!outBMP)
-    	{
-		    printf("Nie mozna otworzyc pliku bmp!\n");
-		      return -1;
-	 }
-
-
-	j=0;
-	for(i=height-1;i>=0; --i)
-	{
-		for(k=0;k<width*3; ++k)
-		{
-          outBMP->line[i][k]=*(bitmapOut+offset+j*(width*3+padding)+k);
-		}
-		++j;
+	grafika = create_bitmap(width, height);
+	if (!grafika){
+		printf("Nie mozna otworzyc pliku bmp!\n");
+		return -1;
 	}
-
-	blit(outBMP, screen, 0,0,0,0,width, height);
-
-
-    c= readkey();
-    while (c!='x'){
-	int b;
-	for (b=0; b<size_of_file;++b){
-		bitmapIn[b]=bitmapOut[b];
-	}
-
-	func(bitmapIn, bitmapOut, size_of_file, window);
-
-	j=0;
-	for(i=height-1;i>=0; --i)
-	{
-		for(k=0;k<width*3; ++k)
-		{
-          outBMP->line[i][k]=*(bitmapOut+offset+j*(width*3+padding)+k);
-		}
-		++j;
-	}
-
-	blit(outBMP, screen, 0,0,0,0,width, height);
+	printf("Menu:\n + aby zwiekszyc wielkosc okna\n - aby zmniejszyc wielkosc okna\n x aby zamknac program\n pozostale klawicze powoduja ponowne przefiltrowanie\n");
+	do {
+		switch (c) {
+			case '+':
+				window=window+2;
+				break;
+			
+			case '-':
+				if (window>3) window=window-2;
+				break;
 	
-	c=readkey();
-    }
+			default:
+
+
+				func(bitmapIn, bitmapOut, size_of_file, window);
+				j=0;
+				for(i=height-1;i>=0; --i)
+				{
+					for(k=0;k<width*3; ++k)
+					{
+					  grafika->line[i][k]=*(bitmapOut+offset+j*(width*3+padding)+k);
+					}
+					++j;
+				}
+
+				blit(grafika, screen, 0,0,0,0,width, height);
+				for (b=0; b<size_of_file;++b){
+					bitmapIn[b]=bitmapOut[b];
+				}
+		}
+		c=readkey();
+	} while (c!='x');
+
+ 
+
+
+  destroy_bitmap(grafika);
+  allegro_exit();
 
 
 
-
-
+/*
    FILE *fp; 
 
    if ((fp=fopen("out.bmp", "w"))==NULL) {
@@ -130,11 +127,12 @@ int main(int argc, char** argv)
      exit(1);
      }
    fwrite(bitmapOut, sizeof(char), size_of_file, fp);
-   fclose (fp); /* zamknij plik */
+   fclose (fp); //zakmnij plik
 
-
+*/
   free(bitmapIn);
   free(bitmapOut);
+
 
   return 0;
 }
