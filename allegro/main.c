@@ -24,6 +24,7 @@ int main(int argc, char** argv)
   int j;
   int k;
   int b;
+  int prog;
   printf("Filtr Minimalny\nProsze podac sciezke do pliku: \n");
   scanf("%s", path);
   while (window%2==0){
@@ -52,6 +53,17 @@ int main(int argc, char** argv)
     fseek(image, 22, 0); //pobierz height
     fread(toconvert, 1, 4, image);    
     height = *(unsigned int *)toconvert;
+
+    if(height>width){
+	prog=width/2; //specjalnie rzutuje w dol
+    }
+    else {
+	prog=height/2;
+    }
+    if(prog<=window) {
+	printf("za duze okno, zmieniam na maksymalne\n");
+	window=prog-prog%2-1;
+	}
 
     padding = (width*3)%4;
     if(padding!=0) padding = 4 - padding;
@@ -87,11 +99,13 @@ int main(int argc, char** argv)
 	do {
 		switch (c) {
 			case '+':
-				window=window+2;
+				if (window<prog-2) window=window+2;
+				printf("Aktualna wielkosc okna %d \n", window);
 				break;
 			
 			case '-':
 				if (window>3) window=window-2;
+				printf("Aktualna wielkosc okna %d \n", window);
 				break;
 	
 			default:
